@@ -1,0 +1,5 @@
+{
+  "name": "Expotecmi Evaluator",
+  "description": "A responsive evaluation platform for Expotecmi student projects, featuring voting, admin dashboard, and data visualization.",
+  "requestFramePermissions": []
+}
