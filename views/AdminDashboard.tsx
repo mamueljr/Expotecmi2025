@@ -3,7 +3,7 @@ import { PROJECTS, PIN_CODE } from '../constants';
 import { db } from '../services/db';
 import { ProjectStats, Evaluation } from '../types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
-import { Trash2, Download, LogOut, AlertTriangle, Lock, TrendingUp, Users, Award, RefreshCcw } from 'lucide-react';
+import { Trash2, Download, LogOut, AlertTriangle, Lock, TrendingUp, Users, Award, Sheet, ExternalLink } from 'lucide-react';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -17,9 +17,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isAuthenticated,
   const [stats, setStats] = useState<ProjectStats[]>([]);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [showConfirmReset, setShowConfirmReset] = useState(false);
+  
+  // Estado de conexión
+  const [sheetStatus, setSheetStatus] = useState<{connected: boolean, error: string | null}>({
+    connected: false,
+    error: null
+  });
 
   useEffect(() => {
     let unsubscribe: () => void;
+    
+    const handleStatus = (e: any) => {
+        setSheetStatus(e.detail);
+    };
+    window.addEventListener('sheet-status', handleStatus);
+
     if (isAuthenticated) {
       unsubscribe = db.subscribeToEvaluations((data) => {
         setEvaluations(data);
@@ -28,6 +40,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isAuthenticated,
     }
     return () => {
       if (unsubscribe) unsubscribe();
+      window.removeEventListener('sheet-status', handleStatus);
     };
   }, [isAuthenticated]);
 
@@ -124,7 +137,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isAuthenticated,
   }
 
   const totalVotesGlobal = evaluations.length;
-  // Score formula: Average ratings (0-5) + (Pay Ratio * 2) to incentivize commercial viability
   const bestProject = [...stats].sort((a, b) => {
     const scoreA = a.totalVotes > 0 ? (a.avgInnovation + a.avgDesign + a.avgFunctionality) / 3 + (a.payYes / a.totalVotes) * 2 : 0;
     const scoreB = b.totalVotes > 0 ? (b.avgInnovation + b.avgDesign + b.avgFunctionality) / 3 + (b.payYes / b.totalVotes) * 2 : 0;
@@ -135,32 +147,50 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isAuthenticated,
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 pb-20">
       
       {/* Header Admin */}
-      <div className="glass-card p-6 rounded-[2rem] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="glass-card p-6 rounded-[2rem] flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Resultados en Vivo</h1>
-          <p className="text-slate-500 font-medium flex items-center mt-2">
-             <span className="relative flex h-3 w-3 mr-2">
-               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-               <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-             </span>
-             Sincronizado con Firebase
-          </p>
+          
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            {sheetStatus.connected ? (
+                <div className="flex items-center text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
+                    <Sheet className="w-3 h-3 mr-2" />
+                    <span className="text-xs font-bold uppercase tracking-wide">Google Sheets Conectado</span>
+                </div>
+            ) : (
+                <div 
+                    className="flex items-center text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-100"
+                >
+                    <AlertTriangle className="w-3 h-3 mr-2" />
+                    <span className="text-xs font-bold uppercase tracking-wide">Sin conexión a Sheet</span>
+                </div>
+            )}
+          </div>
         </div>
         
         <div className="flex flex-wrap gap-3">
+          <a 
+            href="https://docs.google.com/spreadsheets"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center px-5 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Abrir Sheet
+          </a>
           <button 
             onClick={() => db.exportData()}
             className="flex items-center px-5 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
           >
             <Download className="w-4 h-4 mr-2" />
-            CSV
+            CSV Local
           </button>
           <button 
             onClick={() => setShowConfirmReset(true)}
             className="flex items-center px-5 py-3 bg-red-50 border border-red-100 rounded-xl text-sm font-bold text-red-600 hover:bg-red-100 transition-colors"
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            Limpiar DB
+            Limpiar Local
           </button>
           <button 
             onClick={onLogout}
@@ -180,7 +210,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ isAuthenticated,
             </div>
             <div>
               <p className="font-bold text-xl">¿Estás seguro?</p>
-              <p className="text-white/80">Esto borrará todos los votos permanentemente.</p>
+              <p className="text-white/80">Esto borrará la vista local. Recuerda limpiar el Excel manualmente.</p>
             </div>
           </div>
           <div className="flex space-x-3 w-full sm:w-auto">

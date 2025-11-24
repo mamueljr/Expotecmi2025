@@ -112,7 +112,7 @@ export const VotingView: React.FC<VotingViewProps> = ({ project, onBack }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 relative pb-32">
+    <div className="max-w-4xl mx-auto px-4 py-8 relative pb-12">
       <button 
         onClick={onBack}
         className="group flex items-center text-sm font-bold text-slate-500 hover:text-indigo-600 mb-8 transition-colors pl-2"
@@ -276,8 +276,8 @@ export const VotingView: React.FC<VotingViewProps> = ({ project, onBack }) => {
             />
         </div>
 
-        {/* Submit Button */}
-        <div className="fixed bottom-6 left-4 right-4 max-w-4xl mx-auto z-40">
+        {/* Submit Button - Static at bottom of form */}
+        <div className="pt-8">
           <button
             type="submit"
             disabled={!isValid || status === 'SUBMITTING'}
