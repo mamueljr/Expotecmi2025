@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({ onHomeClick, onAdminClick, title
               EXPOTECMI 2025
             </span>
             <span className="text-[10px] font-bold text-indigo-600 tracking-[0.2em] uppercase mt-0.5">
-              Evaluación ISD
+              Evaluación IDS
             </span>
           </div>
         </button>
