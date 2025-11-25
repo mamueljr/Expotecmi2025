@@ -21,10 +21,10 @@ export const Header: React.FC<HeaderProps> = ({ onHomeClick, onAdminClick, title
           </div>
           <div className="flex flex-col items-start">
             <span className="font-extrabold text-2xl tracking-tighter text-slate-900 leading-none">
-              EXPOTECMI
+              EXPOTECMI 2025
             </span>
             <span className="text-[10px] font-bold text-indigo-600 tracking-[0.2em] uppercase mt-0.5">
-              Evaluación 2025
+              Evaluación ISD
             </span>
           </div>
         </button>
